@@ -111,6 +111,7 @@ typedef struct {
     int frustrated_customers;
     time_t start_time; // used to track runtime
     int shutdown_flag; // 1 = signal to terminate
+    int complain_flag;
 } SharedStats;
 
 

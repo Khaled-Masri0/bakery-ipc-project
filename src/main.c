@@ -78,7 +78,7 @@ void fork_chefs(const Config* config) {
             if (pid == 0) execl("./chef", "chef", roles[i], NULL);
             else track_child(pid);
         }
-        usleep(300000);
+        
     }
     printf("[Main] Chefs forked.\n");
 }
@@ -97,7 +97,7 @@ void fork_bakers(const Config* config) {
             if (pid == 0) execl("./baker", "baker", teams[i], NULL);
             else track_child(pid);
         }
-        usleep(300000);
+        
     }
     printf("[Main] Bakers forked.\n");
 }
@@ -164,14 +164,13 @@ int main() {
     }
 
     sleep(2);
-
     fork_chefs(&config);
     sleep(1);
     fork_bakers(&config);
     sleep(1);
 
     // Customer delay
-    for (int i = 10; i > 0; i--) {
+    for (int i = config.CUSTOMER_ARRIVE_TIME; i > 0; i--) {
         printf("[Main] Customers arrive in %d seconds...\n", i);
         sleep(1);
     }
@@ -191,7 +190,7 @@ int main() {
                 perror("execl customer");
                 exit(1);
             }
-            sleep(7);
+            sleep(config.CUSTOMER_EVERY_SECONDS);
         }
         exit(0);
     }

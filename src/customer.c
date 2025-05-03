@@ -55,6 +55,7 @@ int main() {
 
     // === Choose random item ===
     const char* item = final_product_names[rand() % FINAL_PRODUCT_COUNT];
+    sleep(2);
 
     // Send request to seller
     CustomerMessage msg;
@@ -74,11 +75,27 @@ int main() {
     for (int waited = 0; waited < config.CUSTOMER_WAIT_TIME; waited++) {
         // Check shutdown during wait
         sem_lock(semid);
+        
         if (stats->shutdown_flag) {
             sem_unlock(semid);
             exit(0); // Exit early if shutdown occurs while waiting
         }
+        
+        if (stats->complain_flag == 1) {
+    if ((rand() % 100) < 50) {
+        printf("[Customer %d] Panicked due to complaint and left.\n", getpid());
         sem_unlock(semid);
+        exit(0);
+    } else {
+        stats->complain_flag = 0; // One customer calms down the rest
+        
+    }
+}
+
+        sem_unlock(semid);
+        
+        
+
 
         if (msgrcv(msqid, &reply, sizeof(reply) - sizeof(long), getpid(), IPC_NOWAIT) != -1) {
             received = 1;

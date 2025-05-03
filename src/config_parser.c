@@ -88,6 +88,13 @@ int load_config(const char* filename, Config* config) {
        
             else if (strcmp(key, "COMPLAINT_PROBABILITY") == 0) config->COMPLAINT_PROBABILITY = value;
             else if (strcmp(key, "CUSTOMER_WAIT_TIME") == 0) config->CUSTOMER_WAIT_TIME = value;
+            else if (strcmp(key, "CUSTOMER_EVERY_SECONDS") == 0) config->CUSTOMER_EVERY_SECONDS = value;
+            else if (strcmp(key, "CUSTOMER_ARRIVE_TIME") == 0) config->CUSTOMER_ARRIVE_TIME = value;
+            else if (strcmp(key, "BREAD_BAKING_TIME") == 0) config->BREAD_BAKING_TIME = value;
+            else if (strcmp(key, "CAKE_BAKING_TIME") == 0) config->CAKE_BAKING_TIME = value;
+            else if (strcmp(key, "SWEET_BAKING_TIME") == 0) config->SWEET_BAKING_TIME = value;
+            else if (strcmp(key, "SWEET_PATISSERIE_BAKING_TIME") == 0) config->SWEET_PATISSERIE_BAKING_TIME = value;
+            else if (strcmp(key, "SAVORY_PATISSERIE_BAKING_TIME") == 0) config->SAVORY_PATISSERIE_BAKING_TIME = value;
 
 
         }

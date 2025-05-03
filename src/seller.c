@@ -117,6 +117,7 @@ int main() {
             if ((rand() % 100) < config.COMPLAINT_PROBABILITY) {
                 stats->complaints++;
                 stats->total_profit -= price;
+                stats->complain_flag = 1;
                 printf("[Seller %d] Customer %d complained. Refunded $%d. Total complaints: %d. Profit now: $%d\n",
                        getpid(), request.customer_pid, price, stats->complaints, stats->total_profit);
             }

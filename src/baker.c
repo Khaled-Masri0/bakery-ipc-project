@@ -33,13 +33,13 @@ void sem_unlock(int semid) {
     semop(semid, &op, 1);
 }
 
-int get_bake_time_for(int product_type) {
+int get_bake_time_for(int product_type, Config* config) {
     switch (product_type) {
-        case BREAD: return 4;
-        case CAKE: return 6;
-        case SWEET: return 5;
-        case SWEET_PATISSERIE: return 7;
-        case SAVORY_PATISSERIE: return 7;
+        case BREAD: return config->BREAD_BAKING_TIME;
+        case CAKE: return config->CAKE_BAKING_TIME;
+        case SWEET: return config->SWEET_BAKING_TIME;
+        case SWEET_PATISSERIE: return config->SWEET_PATISSERIE_BAKING_TIME;
+        case SAVORY_PATISSERIE: return config->SAVORY_PATISSERIE_BAKING_TIME;
         default: return 3;
     }
 }
@@ -90,120 +90,128 @@ int main(int argc, char* argv[]) {
     }
 
     while (1) {
-        // Check shutdown
-        sem_lock(sem_stats);
-        if (stats->shutdown_flag) {
-            sem_unlock(sem_stats);
-            printf("[Baker %d] Shutdown flag detected. Exiting.\n", getpid());
-            break;
-        }
+    // Check shutdown
+    sem_lock(sem_stats);
+    if (stats->shutdown_flag) {
         sem_unlock(sem_stats);
-
-        sem_lock(sem_ready);
-
-        if (team == TEAM_BREAD) {
-            if (ready->ready_products[RAW_BREAD] > 0) {
-                ready->ready_products[RAW_BREAD]--;
-                sem_unlock(sem_ready);
-
-                sleep(get_bake_time_for(BREAD));
-
-                sem_lock(sem_bread);
-                if (bread->breads[BREAD] < config.MAX_BREAD) {
-                    bread->breads[BREAD]++;
-                    printf("[Baker %d] Baked Bread. Total: %d\n", getpid(), bread->breads[BREAD]);
-                } else {
-                    printf("[Baker %d] Max Bread limit reached. Skipping.\n", getpid());
-                }
-                sem_unlock(sem_bread);
-            } else {
-                printf("[Baker %d] No raw bread to bake.\n", getpid());
-                sem_unlock(sem_ready);
-            }
-        }
-
-        else if (team == TEAM_CAKESWEETS) {
-            if (ready->ready_products[RAW_CAKE] > 0) {
-                ready->ready_products[RAW_CAKE]--;
-                sem_unlock(sem_ready);
-                sleep(get_bake_time_for(CAKE));
-
-                sem_lock(sem_final);
-                if (final->final_products[CAKE] < config.MAX_CAKE) {
-                    final->final_products[CAKE]++;
-                    printf("[Baker %d] Baked Cake. Total: %d\n", getpid(), final->final_products[CAKE]);
-                } else {
-                    printf("[Baker %d] Max Cake limit reached. Skipping.\n", getpid());
-                }
-                sem_unlock(sem_final);
-            } else {
-                sem_unlock(sem_ready);
-                printf("[Baker %d] No raw cake to bake.\n", getpid());
-            }
-
-            sem_lock(sem_ready);
-            if (ready->ready_products[RAW_SWEET] > 0) {
-                ready->ready_products[RAW_SWEET]--;
-                sem_unlock(sem_ready);
-                sleep(get_bake_time_for(SWEET));
-
-                sem_lock(sem_final);
-                if (final->final_products[SWEET] < config.MAX_SWEET) {
-                    final->final_products[SWEET]++;
-                    printf("[Baker %d] Baked Sweet. Total: %d\n", getpid(), final->final_products[SWEET]);
-                } else {
-                    printf("[Baker %d] Max Sweet limit reached. Skipping.\n", getpid());
-                }
-                sem_unlock(sem_final);
-            } else {
-                sem_unlock(sem_ready);
-                printf("[Baker %d] No raw sweet to bake.\n", getpid());
-            }
-        }
-
-        else if (team == TEAM_PATISSERIES) {
-            sem_lock(sem_ready);
-            if (ready->ready_products[RAW_SWEET_PATISSERIE] > 0) {
-                ready->ready_products[RAW_SWEET_PATISSERIE]--;
-                sem_unlock(sem_ready);
-                sleep(get_bake_time_for(SWEET_PATISSERIE));
-
-                sem_lock(sem_final);
-                if (final->final_products[SWEET_PATISSERIE] < config.MAX_SWEET_PATISSERIE) {
-                    final->final_products[SWEET_PATISSERIE]++;
-                    printf("[Baker %d] Baked Sweet Patisserie. Total: %d\n", getpid(), final->final_products[SWEET_PATISSERIE]);
-                } else {
-                    printf("[Baker %d] Max Sweet Patisserie limit reached. Skipping.\n", getpid());
-                }
-                sem_unlock(sem_final);
-            } else {
-                sem_unlock(sem_ready);
-                printf("[Baker %d] No raw sweet patisseries to bake.\n", getpid());
-            }
-
-            sem_lock(sem_ready);
-            if (ready->ready_products[RAW_SAVORY_PATISSERIE] > 0) {
-                ready->ready_products[RAW_SAVORY_PATISSERIE]--;
-                sem_unlock(sem_ready);
-                sleep(get_bake_time_for(SAVORY_PATISSERIE));
-
-                sem_lock(sem_final);
-                if (final->final_products[SAVORY_PATISSERIE] < config.MAX_SAVORY_PATISSERIE) {
-                    final->final_products[SAVORY_PATISSERIE]++;
-                    printf("[Baker %d] Baked Savory Patisserie. Total: %d\n", getpid(), final->final_products[SAVORY_PATISSERIE]);
-                } else {
-                    printf("[Baker %d] Max Savory Patisserie limit reached. Skipping.\n", getpid());
-                }
-                sem_unlock(sem_final);
-            } else {
-                sem_unlock(sem_ready);
-                printf("[Baker %d] No raw savory patisseries to bake.\n", getpid());
-            }
-        }
-        
-
-        sleep(2); 
+        printf("[Baker %d] Shutdown flag detected. Exiting.\n", getpid());
+        break;
     }
+    sem_unlock(sem_stats);
+
+    int baked_something = 0;
+
+    sem_lock(sem_ready);
+
+    if (team == TEAM_BREAD) {
+        if (ready->ready_products[RAW_BREAD] > 0) {
+            ready->ready_products[RAW_BREAD]--;
+            sem_unlock(sem_ready);
+
+            sleep(get_bake_time_for(BREAD, &config));
+
+            sem_lock(sem_bread);
+            if (bread->breads[BREAD] < config.MAX_BREAD) {
+                bread->breads[BREAD]++;
+                printf("[Baker %d] Baked Bread. Total: %d\n", getpid(), bread->breads[BREAD]);
+                baked_something = 1;
+            } else {
+                printf("[Baker %d] Max Bread limit reached. Skipping.\n", getpid());
+            }
+            sem_unlock(sem_bread);
+        } else {
+            sem_unlock(sem_ready);
+            printf("[Baker %d] No raw bread to bake.\n", getpid());
+        }
+    }
+
+    else if (team == TEAM_CAKESWEETS) {
+        int handled = 0;
+
+        if (ready->ready_products[RAW_CAKE] > 0) {
+            ready->ready_products[RAW_CAKE]--;
+            sem_unlock(sem_ready);
+            sleep(get_bake_time_for(CAKE, &config));
+
+            sem_lock(sem_final);
+            if (final->final_products[CAKE] < config.MAX_CAKE) {
+                final->final_products[CAKE]++;
+                printf("[Baker %d] Baked Cake. Total: %d\n", getpid(), final->final_products[CAKE]);
+                baked_something = 1;
+            } else {
+                printf("[Baker %d] Max Cake limit reached. Skipping.\n", getpid());
+            }
+            sem_unlock(sem_final);
+            handled = 1;
+        }
+
+        if (!handled && ready->ready_products[RAW_SWEET] > 0) {
+            ready->ready_products[RAW_SWEET]--;
+            sem_unlock(sem_ready);
+              sleep(get_bake_time_for(SWEET, &config));
+
+            sem_lock(sem_final);
+            if (final->final_products[SWEET] < config.MAX_SWEET) {
+                final->final_products[SWEET]++;
+                printf("[Baker %d] Baked Sweet. Total: %d\n", getpid(), final->final_products[SWEET]);
+                baked_something = 1;
+            } else {
+                printf("[Baker %d] Max Sweet limit reached. Skipping.\n", getpid());
+            }
+            sem_unlock(sem_final);
+        }
+
+        if (!handled) {
+            sem_unlock(sem_ready);
+            printf("[Baker %d] No raw cakes or sweets to bake.\n", getpid());
+        }
+    }
+
+    else if (team == TEAM_PATISSERIES) {
+        int handled = 0;
+
+        if (ready->ready_products[RAW_SWEET_PATISSERIE] > 0) {
+            ready->ready_products[RAW_SWEET_PATISSERIE]--;
+            sem_unlock(sem_ready);
+              sleep(get_bake_time_for(SWEET_PATISSERIE, &config));
+
+            sem_lock(sem_final);
+            if (final->final_products[SWEET_PATISSERIE] < config.MAX_SWEET_PATISSERIE) {
+                final->final_products[SWEET_PATISSERIE]++;
+                printf("[Baker %d] Baked Sweet Patisserie. Total: %d\n", getpid(), final->final_products[SWEET_PATISSERIE]);
+                baked_something = 1;
+            } else {
+                printf("[Baker %d] Max Sweet Patisserie limit reached. Skipping.\n", getpid());
+            }
+            sem_unlock(sem_final);
+            handled = 1;
+        }
+
+        if (!handled && ready->ready_products[RAW_SAVORY_PATISSERIE] > 0) {
+            ready->ready_products[RAW_SAVORY_PATISSERIE]--;
+            sem_unlock(sem_ready);
+            sleep(get_bake_time_for(SAVORY_PATISSERIE, &config));
+
+            sem_lock(sem_final);
+            if (final->final_products[SAVORY_PATISSERIE] < config.MAX_SAVORY_PATISSERIE) {
+                final->final_products[SAVORY_PATISSERIE]++;
+                printf("[Baker %d] Baked Savory Patisserie. Total: %d\n", getpid(), final->final_products[SAVORY_PATISSERIE]);
+                baked_something = 1;
+            } else {
+                printf("[Baker %d] Max Savory Patisserie limit reached. Skipping.\n", getpid());
+            }
+            sem_unlock(sem_final);
+        }
+
+        if (!handled) {
+            sem_unlock(sem_ready);
+            printf("[Baker %d] No raw patisseries to bake.\n", getpid());
+        }
+    }
+
+    if (!baked_something) sleep(2);
+}
+
 
     return 0;
 }

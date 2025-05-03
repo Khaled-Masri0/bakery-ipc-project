@@ -61,6 +61,15 @@ typedef struct {
     int COMPLAINT_PROBABILITY;
     
     int CUSTOMER_WAIT_TIME;
+    
+    int CUSTOMER_EVERY_SECONDS;
+    int CUSTOMER_ARRIVE_TIME;
+    
+    int BREAD_BAKING_TIME;
+    int CAKE_BAKING_TIME;
+    int SWEET_BAKING_TIME;
+    int SWEET_PATISSERIE_BAKING_TIME;
+    int SAVORY_PATISSERIE_BAKING_TIME;
 
 
 } Config;
