@@ -1,0 +1,70 @@
+#ifndef CONFIG_PARSER_H
+#define CONFIG_PARSER_H
+
+typedef struct {
+    
+    int NUM_SUPPLIERS;
+
+    int NUM_CHEFS_PASTE;
+    int NUM_CHEFS_CAKES;
+    int NUM_CHEFS_SANDWICHES;
+    int NUM_CHEFS_SWEETS;
+    int NUM_CHEFS_SWEET_PATISSERIES;
+    int NUM_CHEFS_SAVORY_PATISSERIES;
+    int NUM_CHEFS_RAWBREAD;
+    int NUM_BAKERS_CAKESWEETS;
+    int NUM_BAKERS_PATISSERIES;
+    int NUM_BAKERS_BREAD;
+    
+
+    
+    int WHEAT_MIN, WHEAT_MAX;
+    int YEAST_MIN, YEAST_MAX;
+    int BUTTER_MIN, BUTTER_MAX;
+    int MILK_MIN, MILK_MAX;
+    int SUGAR_SALT_MIN, SUGAR_SALT_MAX;
+    int SWEET_ITEMS_MIN, SWEET_ITEMS_MAX;
+    int CHEESE_SALAMI_MIN, CHEESE_SALAMI_MAX;
+
+    
+    int MAX_RAW_BREAD;
+    int MAX_RAW_CAKE;
+    int MAX_RAW_SWEET;
+    int MAX_RAW_SWEET_PATISSERIE;
+    int MAX_RAW_SAVORY_PATISSERIE;
+
+   
+    int MAX_BREAD;
+    int MAX_CAKE;
+    int MAX_SWEET;
+    int MAX_SWEET_PATISSERIE;
+    int MAX_SAVORY_PATISSERIE;
+    int MAX_SANDWICH;
+    
+    int MAX_PASTE;
+
+    
+    int PRICE_SANDWICH;
+    int PRICE_CAKE;
+    int PRICE_SWEET;
+    int PRICE_SWEET_PATISSERIE;
+    int PRICE_SAVORY_PATISSERIE;
+
+    
+    int MAX_FRUSTRATED_CUSTOMERS;
+    int MAX_CUSTOMER_COMPLAINTS;
+    int MAX_PROFIT;
+    int MAX_RUNTIME_MINUTES;
+
+    int NUM_SELLERS;
+    
+    int COMPLAINT_PROBABILITY;
+    
+    int CUSTOMER_WAIT_TIME;
+
+
+} Config;
+
+int load_config(const char* filename, Config* config);
+
+#endif

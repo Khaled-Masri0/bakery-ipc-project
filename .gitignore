@@ -1,0 +1,10 @@
+# Ignore object files
+*.o
+
+# Ignore compiled binaries
+main
+supplier
+chef
+baker
+customer
+
